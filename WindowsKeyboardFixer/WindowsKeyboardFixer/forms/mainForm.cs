@@ -16,7 +16,11 @@ namespace WindowsKeyboardFixer {
         /// <summary>
         /// app settings that are stored in the registry
         /// </summary>
-        private Settings appSettings = new Settings() { appName = "KeyboardFixer" };
+        private Settings computerSettings = new Settings() { appName = "KeyboardFixer" };
+        /// <summary>
+        /// stores the app specific settings. 
+        /// </summary>
+        private AppSettings appSettings = new AppSettings();
 
         /// <summary>
         /// handler for the keyboard (layout) interaction.
@@ -41,7 +45,8 @@ namespace WindowsKeyboardFixer {
         public mainForm() {
             InitializeComponent();
             filterCultureInfos();
-            checkBox1.Checked = appSettings.HaveRegistered();
+            checkBox1.Checked = computerSettings.HaveRegistered();
+            handleAutoStart();
             isDoneInitalizing = true;
         }
 
@@ -58,13 +63,17 @@ namespace WindowsKeyboardFixer {
         }
 
         private void button1_Click(object sender, EventArgs e) {
+            listen();
+        }
+
+        private void listen() {
             if (selectedInfo != null) {
+                appSettings.selectedLangLCID = selectedInfo.LCID;
                 keyboardHandler.Register(selectedInfo);
                 handleUI(false);
                 HideToTray();
             }
         }
-
         private void handleUI(bool enableSelection) {
             button1.Enabled = enableSelection;
             button2.Enabled = !enableSelection;
@@ -108,7 +117,7 @@ namespace WindowsKeyboardFixer {
             if (!isDoneInitalizing) {
                 return;
             }
-            appSettings.RegiterOrUnRegister(checkBox1.Checked);
+            computerSettings.RegiterOrUnRegister(checkBox1.Checked);
         }
 
         private void HideToTray() {
@@ -118,11 +127,32 @@ namespace WindowsKeyboardFixer {
         }
 
         private void notifyIcon1_Click(object sender, EventArgs e) {
-            if (!Visible) { 
+            if (!Visible) {
                 Show();
             } else {
                 Hide();
             }
         }
+
+        private void handleAutoStart() {
+            if (checkBox1.Checked && (appSettings.selectedLangLCID > 0)) {
+                try {
+                    selectedInfo = new CultureInfo(appSettings.selectedLangLCID);
+                    listen();
+                } catch (Exception exception) {
+                    Console.WriteLine("Error, the stored culture is invalid..");
+                }
+            }
+        }
+
+        protected override void SetVisibleCore(bool value) {
+            if (!IsHandleCreated && value) {
+                base.CreateHandle();
+                value = false;
+            }
+            base.SetVisibleCore(value);
+        }
+
+
     }
 }

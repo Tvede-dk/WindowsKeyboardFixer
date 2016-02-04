@@ -1,88 +1,28 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace WindowsKeyboardFixer {
-
-    /// <summary>
-    ///  manges the windows settings (via the registry).
-    /// </summary>
-    public class Settings {
-
-
-        #region property appName
-        private string _appName;
-
-
-        public string appName
-        {
-            get { return _appName; }
-            set { _appName = value; }
-        }
-        #endregion
-
-        #region constructors
+﻿namespace WindowsKeyboardFixer.Properties {
+    
+    
+    // This class allows you to handle specific events on the settings class:
+    //  The SettingChanging event is raised before a setting's value is changed.
+    //  The PropertyChanged event is raised after a setting's value is changed.
+    //  The SettingsLoaded event is raised after the setting values are loaded.
+    //  The SettingsSaving event is raised before the setting values are saved.
+    internal sealed partial class Settings {
+        
         public Settings() {
-
+            // // To add event handlers for saving and changing settings, uncomment the lines below:
+            //
+            // this.SettingChanging += this.SettingChangingEventHandler;
+            //
+            // this.SettingsSaving += this.SettingsSavingEventHandler;
+            //
         }
-        #endregion
-
-        #region public functions
-        /// <summary>
-        /// the entry in the register where to store / delete apps that are to start when booting. 
-        /// </summary>
-        private const string REGISTRY_RUN_KEY = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
-
-
-        /// <summary>
-        /// registers the app for boot, if the paramter is true, otherwise deletes it from the boot process.
-        /// </summary>
-        /// <param name="register">true -> added to boot list, false -> removed</param>
-        public void RegiterOrUnRegister(bool register) {
-            Settings.setStartup(register, appName);
+        
+        private void SettingChangingEventHandler(object sender, System.Configuration.SettingChangingEventArgs e) {
+            // Add code to handle the SettingChangingEvent event here.
         }
-
-        /// <summary>
-        /// appends the app from the boot app list
-        /// </summary>
-        public void RegisterForBoot() {
-            setStartup(true, appName);
+        
+        private void SettingsSavingEventHandler(object sender, System.ComponentModel.CancelEventArgs e) {
+            // Add code to handle the SettingsSaving event here.
         }
-        /// <summary>
-        /// removes the app from the boot app list
-        /// </summary>
-        public void UnRegisterForBoot() {
-            setStartup(false, appName);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="appName"></param>
-        /// <returns></returns>
-        public bool HaveRegistered() {
-            RegistryKey rk = Registry.CurrentUser.OpenSubKey(REGISTRY_RUN_KEY, true);
-            return rk.GetValue(appName, null) != null;
-        }
-        #endregion
-
-        #region internal functions. 
-        /// <summary>
-        /// helper function. 
-        /// </summary>
-        /// <param name="isAdd"></param>
-        /// <param name="appName"></param>
-        private static void setStartup(bool isAdd, string appName) {
-            RegistryKey rk = Registry.CurrentUser.OpenSubKey(REGISTRY_RUN_KEY, true);
-            if (isAdd) {
-                rk.SetValue(appName, Application.ExecutablePath.ToString()); //the path is the app to start :)
-            } else {
-                rk.DeleteValue(appName, false);
-            }
-        }
-        #endregion
     }
 }
