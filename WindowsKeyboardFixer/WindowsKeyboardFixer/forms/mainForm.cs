@@ -140,8 +140,10 @@ namespace WindowsKeyboardFixer {
                     selectedInfo = new CultureInfo(appSettings.selectedLangLCID);
                     listen();
                 } catch (Exception exception) {
-                    Console.WriteLine("Error, the stored culture is invalid..");
+                    Console.WriteLine("Error, the stored culture is invalid; reason: {0}" , exception?.Message);
                 }
+            }else {
+                Show();
             }
         }
 
